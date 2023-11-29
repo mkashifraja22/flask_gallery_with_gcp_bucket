@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        Image Storage Service
+    </title>
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.css" rel="stylesheet"/>
+    <!-- MDB -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.js"></script>
+
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- Container wrapper -->
+    <div class="container">
+        <!-- Navbar brand -->
+
+        <a class="navbar-brand me-2" href="/">
+            <img
+                    src="{{ url_for('static', filename = 'home.svg') }}"
+                    height="16"
+                    alt="MDB Logo"
+                    loading="lazy"
+                    style="margin-top: -1px;"
+            />
+        </a>
+
+        <!-- Toggle button -->
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-mdb-toggle="collapse"
+                data-mdb-target="#navbarButtonsExample"
+                aria-controls="navbarButtonsExample"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+        >
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Collapsible wrapper -->
+        <div class="collapse navbar-collapse" id="navbarButtonsExample">
+            <!-- Left links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/galleries">All Galleries</a>
+                </li>
+
+            </ul>
+            <!-- Left links -->
+
+            <div class="d-flex align-items-center">
+                <a href="#" class="btn btn-link px-3 me-2">
+                    {{ email }}
+                </a>
+                <a href="/logout" class="btn btn-link px-3 me-2">
+                    Logout
+                </a>
+            </div>
+        </div>
+        <!-- Collapsible wrapper -->
+    </div>
+    <!-- Container wrapper -->
+</nav>
+<!-- Navbar -->
+<br>
+<center>
+    <a class="btn btn-primary btn-action mr-1" data-toggle="modal" data-target="#myModal">Upload Image</a>
+    <a class="btn btn-primary btn-action mr-1" data-toggle="modal" data-target="#Adduser">Share Galley with user</a>
+
+        <a class="btn btn-danger btn-action mr-1"  href="{{ url_for('gallery_details',id=gallery_id) }}">Show all Images in Gallery</a>
+
+</center>
+<!-- Carousel wrapper -->
+<div
+        id="carouselMultiItemExample"
+        class="carousel slide carousel-dark text-center"
+        data-mdb-ride="carousel"
+>
+    <!-- Controls -->
+    <div class="d-flex justify-content-center mb-4">
+
+    </div>
+    <!-- Inner -->
+    <div class="carousel-inner py-4">
+        <!-- Single item -->
+        <div class="carousel-item active">
+            <div class="container">
+
+                <div class="row">
+                    {% for image in image_list %}
+                        <div class="col-lg-4">
+                            <div class="card">
+                                <img style="height: 278px;
+                  width: 416px;"
+                                     src="{{ image.url }}"
+                                     class="card-img-top"
+                                     alt="Waterfall"
+                                />
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ image.file_name }}</h5>
+
+                                    <a class="btn btn-danger btn-action"
+                                       href="{{ url_for('delete_image',id=image.id ,gallery_id=image.gallery) }}"><i
+                                            class="fas fa-trash"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Single item -->
+
+    </div>
+    <!-- Inner -->
+</div>
+<!-- Carousel wrapper -->
+
+
+<div class="modal fade" id="Adduser" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">Add User To Board</h4>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/add-user-to-taskboard">
+                    <select style="width: 50%" name="user_name" id="user_name">
+                        {% for user in user_list %}
+                            <option value="{{ user.email }}">{{ user.name }}</option>
+                        {% endfor %}
+                    </select><br><br>
+                    <input name="user" id="user" value="{{ email }}" hidden>
+
+                    <input name="taskboard" id="taskboard" value="{{ task_board_id }}" hidden>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+
+                <h4 class="modal-title">Upload Image </h4>
+            </div>
+            <div class="modal-body">
+                <form action="/add-image" method="post" enctype="multipart/form-data">
+
+                    <input type="file" style="width: 50%" name="file" id="name" placeholder="select an image" required
+                           accept="image/png, image/jpeg"><br><br>
+                    <input name="gallery" id="gallery" value="{{ gallery_id }}" hidden>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        Image Storage Service
+    </title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.css" rel="stylesheet"/>
+    <!-- MDB -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/4.3.0/mdb.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- Container wrapper -->
+    <div class="container">
+        <!-- Navbar brand -->
+        <a class="navbar-brand me-2" href="/">
+            <img
+                    src="{{ url_for('static', filename = 'home.svg') }}"
+                    height="16"
+                    alt="MDB Logo"
+                    loading="lazy"
+                    style="margin-top: -1px;"
+            />
+        </a>
+
+        <!-- Toggle button -->
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-mdb-toggle="collapse"
+                data-mdb-target="#navbarButtonsExample"
+                aria-controls="navbarButtonsExample"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+        >
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Collapsible wrapper -->
+        <div class="collapse navbar-collapse" id="navbarButtonsExample">
+            <!-- Left links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="modal" data-target="#myModal" href="javascript:void(0)">Add
+                        Gallery</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/check_duplicates">Duplicate Images</a>
+                </li>
+            </ul>
+            <!-- Left links -->
+
+            <div class="d-flex align-items-center">
+                <a href="#" class="btn btn-link px-3 me-2">
+                    {{ email }}
+                </a>
+                <a href="/logout" class="btn btn-link px-3 me-2">
+                    Logout
+                </a>
+
+
+            </div>
+        </div>
+        <!-- Collapsible wrapper -->
+    </div>
+    <!-- Container wrapper -->
+</nav>
+<!-- Navbar -->
+<!-- Carousel wrapper -->
+<div id="carouselMultiItemExample" class="carousel slide carousel-dark text-center" data-mdb-ride="carousel">
+    <!-- Controls -->
+    <div class="d-flex justify-content-center mb-4">
+        <br>
+        <h1>All Galleries</h1>
+
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+                {% for message in messages %}
+                    <small id="emailHelp" style="color: red !important;">{{ message }}.</small>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <!-- Inner -->
+
+    <div class="carousel-inner py-4">
+        <!-- Single item -->
+        <div class="carousel-item active">
+            <div class="container">
+                <div class="row">
+                    {% for gallery in gallery_list %}
+                        <div class="col-lg-4">
+                            <div class="card">
+                                {% if gallery.image.url %}
+                                    <img src="{{ gallery.image.url }} " style="height: 278px;
+                  width: 416px;"
+                                         class="card-img-top" alt="Waterfall"/>
+                                {% else %}
+                                    <img src="" style="height: 278px;
+                  width: 416px;"
+                                         class="card-img-top" alt="Empty Gallery"/>
+                                {% endif %}
+                                <div class="card-body">
+                                    <a href="{{ url_for('gallery_details',id=gallery.id) }}">
+                                        <h5 class="card-title">{{ gallery.gallery_name }}</h5>
+                                    </a>
+
+                                    <a href="{{ url_for('gallery_details',id=gallery.id) }}" class="btn btn-success"><i
+                                            class="fas fa-eye"></i></a>
+
+                                    {% if gallery.user == email %}
+                                        <a class="btn btn-primary btn-action mr-1 edit_task" data-toggle="modal"
+                                           data-target="#editModal" task_board_id="{{ gallery.id }}"
+                                           task_board_name="{{ gallery.gallery_name }}"><i
+                                                class="fas fa-pencil-alt"></i></a>
+                                        <a class="btn btn-danger btn-action {% if gallery.total_images >0 %}delete{% endif %}"
+                                           data-confirm="Are you sure to delete this Gallery?
+This have {{ gallery.total_images }} images"
+                                           href="{{ url_for('delete_gallery',id=gallery.id) }}"><i
+                                                class="fas fa-trash"></i></a>
+
+
+                                        <script>
+
+                                            var deleteLinks = document.querySelectorAll('.delete');
+
+                                            for (var i = 0; i < deleteLinks.length; i++) {
+                                                deleteLinks[i].addEventListener('click', function (event) {
+                                                    event.preventDefault();
+
+                                                    var choice = confirm(this.getAttribute('data-confirm'));
+
+                                                    if (choice) {
+                                                        window.location.href = this.getAttribute('href');
+                                                    }
+                                                });
+                                            }
+                                        </script>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Inner -->
+    </div>
+    <!-- Carousel wrapper -->
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+
+                    <h4 class="modal-title">Add Gallery</h4>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="/add-gallery">
+                        <input name="name" id="name" placeholder="Gallery Name" required>
+                        <input name="user" id="user" value="{{ email }}" hidden>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+
+                    <h4 class="modal-title">Edit</h4>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="/edit-gallery">
+                        <script>
+                            $(".edit_task").on("click", function () {
+                                let field = $(this)
+                                let task_name = field.attr('task_board_name')
+                                console.log(task_name)
+                                let tbi = field.attr('task_board_id')
+                                console.log(tbi)
+                                document.getElementById('taskboard_').value = tbi
+                                document.getElementById('name1').value = task_name
+
+                            })
+                        </script>
+                        <input name="name" id="name1" placeholder="Gallery name">
+                        <input name="gallery_id" id="taskboard_" value="" hidden>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>
